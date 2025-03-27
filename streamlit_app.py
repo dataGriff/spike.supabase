@@ -1,23 +1,27 @@
 import streamlit as st
-from supabase import create_client, Client
+from st_supabase_connection import SupabaseConnection, execute_query
 
-# Initialize connection.
-# Uses st.cache_resource to only run once.
-@st.cache_resource
-def init_connection():
-    url = st.secrets["SUPABASE_URL"]
-    key = st.secrets["SUPABASE_KEY"]
-    return create_client(url, key)
-
-supabase = init_connection()
+st_supabase_client = st.connection("supabase",type=SupabaseConnection)
 
 # Perform query.
-# Uses st.cache_data to only rerun when the query changes or after 10 min.
-@st.cache_data(ttl=600)
-def run_query():
-    return supabase.table("dog").select("*").execute().data
+##rows = conn.execute_query("*", table="dog", ttl="10m").execute()
 
-rows = run_query()
+response = execute_query(
+        st_supabase_client.table("dog").select("name"), 
+        ttl="10min",
+    )
 
-for row in rows:
-    st.write(f"This is :{row['name']}:")
+st.dataframe(response.data, use_container_width=True)
+
+# for row in rows:
+#     st.write(f"This is :{row['name']}:")
+
+dog_name_input = st.text_input("Enter Dog Name")
+st.button("Insert data")
+if st.button:
+    execute_query(
+            st_supabase_client.table("dog").insert(
+                [{"name": f"{dog_name_input}"}], 
+            ),
+            ttl=0,
+        )
