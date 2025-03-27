@@ -15,7 +15,7 @@ if st.session_state["user"] is None:
 
 if st.session_state["user"] is not None:
     st.write(f"Welcome, {st.session_state['user'].email}!")
-    logout_button = st.button("Logout")
+    logout_button = st.sidebar.button("Logout")
     if logout_button:
         st_supabase_client.auth.sign_out()
         st.session_state["user"] = None
@@ -133,7 +133,8 @@ with tab2:
                     except Exception as e:
                         st.error(f"An error occurred while submitting the form: {e}")
                     else:
-                        st.balloons()
-                        st.write("### Info")
-                        for key, value in form_values.items():
-                            st.write(f"**{key}** : {value}")
+                        st.rerun()
+                        # st.balloons()
+                        # st.write("### Info")
+                        # for key, value in form_values.items():
+                        #     st.write(f"**{key}** : {value}")

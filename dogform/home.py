@@ -14,7 +14,7 @@ if "user" not in st.session_state:
 
 if st.session_state["user"] is None:
     # Hide sidebar until logged in
-    st.sidebar.empty()
+    # st.sidebar.empty()
 
     auth_mode = st.radio("Choose authentication mode", options=["Login", "Sign Up"])
 
@@ -49,7 +49,7 @@ if st.session_state["user"] is None:
 
 if st.session_state["user"] is not None:
     # Show sidebar content after login
-    st.sidebar.write(f"Welcome, {st.session_state['user'].email}!")
+    st.write(f"Welcome, {st.session_state['user'].email}!")
     logout_button = st.sidebar.button("Logout")
     if logout_button:
         st_supabase_client.auth.sign_out()
