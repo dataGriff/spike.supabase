@@ -66,13 +66,15 @@ with tab1:
         tomorrow = today + timedelta(days=1)
         walks_today = len([walk for walk in walk_list if walk['scheduled_date'] == str(today)])
         walks_tomorrow = len([walk for walk in walk_list if walk['scheduled_date'] == str(tomorrow)])
-        col1, col2, col3 = st.columns(3)
-        with col1:  
-            st.write("Total: {}".format(walks_total))
-        with col2:
-            st.write("Today: {}".format(walks_today))
-        with col3:
-            st.write("Tomorrow: {}".format(walks_tomorrow))
+        # Use `st.container` with `st.columns` to ensure proper layout on mobile
+        with st.container():
+            col1, col2, col3 = st.columns(3, gap="small")
+            with col1:  
+                st.write("Total: {}".format(walks_total))
+            with col2:
+                st.write("Today: {}".format(walks_today))
+            with col3:
+                st.write("Tomorrow: {}".format(walks_tomorrow))
 
         with st.expander("Add a New Walk", expanded=False):
             with st.form(key="new_walk_form"):
