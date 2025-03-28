@@ -1,7 +1,6 @@
 import streamlit as st
 from enum import Enum
 from st_supabase_connection import SupabaseConnection, execute_query
-from supabase import create_client, Client
 from datetime import datetime
 
 st_supabase_client = st.connection("supabase", type=SupabaseConnection)
