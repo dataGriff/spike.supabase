@@ -126,7 +126,7 @@ with tab1:
                     with col1:
                         st.write(f"{walk['dog_name']} on {walk['scheduled_date']} at {walk['scheduled_time'][:-3]}")
                     with col2:
-                        cancel_button = st.form_submit_button("Cancel Walk")
+                        cancel_button = st.form_submit_button("Cancel")
                         if cancel_button:
                             try:
                                 response = execute_query(
@@ -142,7 +142,7 @@ with tab1:
                             except Exception as e:
                                 st.error(f"An error occurred while cancelling the walk: {e}")
                     with col3:
-                        complete_button = st.form_submit_button("Complete Walk")
+                        complete_button = st.form_submit_button("Complete")
                         if complete_button:
                             try:
                                 response = execute_query(
