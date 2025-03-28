@@ -48,8 +48,8 @@ if st.session_state["user"] is not None:
     # Show sidebar content after login
     st.write(f"Welcome, {st.session_state['user'].email}!")
     logout_button = st.sidebar.button("Logout")
+    st.switch_page("pages/walks.py")
     if logout_button:
         st_supabase_client.auth.sign_out()
         st.session_state["user"] = None
         st.rerun()
-        st.switch_page("pages/dogs.py")
