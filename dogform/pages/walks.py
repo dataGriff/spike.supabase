@@ -37,7 +37,7 @@ if dog_list:
     ]
     dog_list = dog_list if dog_list else []
 
-tab1, tab2, tab3  = st.tabs([ "View Scheduled Walks", "Manage Walks", "Calendar View" ])
+tab1, tab2  = st.tabs([ "View Scheduled Walks", "Calendar View" ])
 
 with tab1:
     try:
@@ -54,56 +54,96 @@ with tab1:
             for walk in walk_list.data
             ]
         walk_list = walk_list if walk_list else []
+        st.write("You have {} scheduled walks.".format(len(walk_list)))
+
+        with st.expander("Add a New Walk", expanded=False):
+            with st.form(key="new_walk_form"):
+                st.write("Fill in the details below:")
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    selected_dog = st.selectbox(
+                        "Select Dog",
+                        options=[dog["name"] for dog in dog_list],
+                        key="new_walk_dog"
+                    )
+                with col2:
+                    new_date = st.date_input("Scheduled Date", key="new_walk_date")
+                with col3:
+                    new_time = st.time_input("Scheduled Time", key="new_walk_time")
+                with col4:
+                    add_walk_button = st.form_submit_button("Add Walk")
+                    if add_walk_button:
+                        try:
+                            selected_dog_id = next(
+                                dog["id"] for dog in dog_list if dog["name"] == selected_dog
+                            )
+                            new_scheduled_at = datetime.combine(new_date, new_time)
+                            response = execute_query(
+                                st_supabase_client.table("walk")
+                                .insert({"dog_id": selected_dog_id, "scheduled_at": str(new_scheduled_at), "status": "Scheduled"}),
+                                ttl="10min",
+                            )
+                            if response.data:
+                                st.success("New walk added successfully!")
+                                st.rerun()
+                            else:
+                                st.error(f"Failed to add new walk: {response.model_dump_json()}")
+                        except Exception as e:
+                            st.error(f"An error occurred while adding the new walk: {e}")
 
         # Display the list of scheduled walks
         if walk_list:
             st.write("Scheduled Walks:")
             for walk in walk_list:
                 with st.form(key=f"walk_form_{walk['scheduled_at']}"):
-                    st.write(f"Dog: {walk['dog_name']}, Scheduled: {walk['scheduled_at']}, Status: {walk['status']}")
-                    reschedule_button = st.form_submit_button("Reschedule Walk")
-                    if reschedule_button:
-                        new_scheduled_at = st.date_input(
-                            "Reschedule Date",
-                            value=datetime.strptime(walk['scheduled_at'], "%Y-%m-%dT%H:%M:%S").date()
+                    col1, col2, col3 , col4, col5 = st.columns(5)
+                    with col1:
+                        time_diff = datetime.strptime(walk['scheduled_at'], '%Y-%m-%dT%H:%M:%S') - datetime.now()
+                        time_ago = f"In {time_diff.days} days" if time_diff.days > 0 else f"In {time_diff.seconds // 3600} hours"
+                        st.write(f"{walk['dog_name']} at {datetime.strptime(walk['scheduled_at'], '%Y-%m-%dT%H:%M:%S').strftime('%H:%M')} on {datetime.strptime(walk['scheduled_at'], '%Y-%m-%dT%H:%M:%S').strftime('%Y-%m-%d')} ({time_ago})")
+                    with col2:
+                        st.selectbox(
+                            "Change Status", 
+                            options=["Scheduled", "Completed", "Cancelled"], 
+                            key=f"status_{walk['scheduled_at']}"
                         )
-                        new_scheduled_time = st.time_input(
-                            "Reschedule Time",
-                            value=datetime.strptime(walk['scheduled_at'], "%Y-%m-%dT%H:%M:%S").time()
+                    with col3:
+                        st.date_input(
+                            "Scheduled Date",
+                            value=datetime.strptime(walk['scheduled_at'], "%Y-%m-%dT%H:%M:%S").date(),
+                            key=f"date_{walk['scheduled_at']}"
                         )
-                        new_scheduled_datetime = datetime.combine(new_scheduled_at, new_scheduled_time)
-                        confirm_reschedule_button = st.form_submit_button("Confirm Reschedule Walk")
-                        if confirm_reschedule_button:
+                    with col4:
+                        st.time_input(
+                            "Scheduled Time",
+                            value=datetime.strptime(walk['scheduled_at'], "%Y-%m-%dT%H:%M:%S").time(),
+                            key=f"time_{walk['scheduled_at']}"
+                        )
+                    with col5:
+                        submit_button = st.form_submit_button("Update Walk")
+                        if submit_button:
                             try:
-                                # Update the walk with the new scheduled time
+                                # Update the walk status and date
+                                new_status = st.session_state[f"status_{walk['scheduled_at']}"]
+                                new_date = st.session_state[f"date_{walk['scheduled_at']}"]
+                                new_time = st.session_state[f"time_{walk['scheduled_at']}"]
+                                new_scheduled_at = datetime.combine(new_date, new_time)
+
                                 response = execute_query(
                                     st_supabase_client.table("walk")
-                                    .update({"scheduled_at": str(new_scheduled_datetime)})
+                                    .update({"status": new_status, "scheduled_at": str(new_scheduled_at)})
                                     .eq("dog_id", walk["dog_id"])
+                                    .eq("scheduled_at", walk["scheduled_at"]),
+                                    ttl="10min",
                                 )
                                 if response.data:
-                                    st.success("Walk rescheduled successfully!")
+                                    st.success("Walk updated successfully!")
                                     st.rerun()
                                 else:
-                                    st.error(f"Failed to reschedule walk: {response.model_dump_json()}")
+                                    st.error(f"Failed to update walk: {response.model_dump_json()}")
                             except Exception as e:
-                                st.error(f"An error occurred while rescheduling the walk: {e}")
-                    cancel_button = st.form_submit_button("Cancel Walk")
-                    if cancel_button:
-                        try:
-                            # Cancel the walk
-                            response = execute_query(
-                                st_supabase_client.table("walk")
-                                .update({"status": "Cancelled"})
-                                .eq("dog_id", walk["dog_id"])
-                            )
-                            if response.data:
-                                st.success("Walk cancelled successfully!")
-                                st.rerun()
-                            else:
-                                st.error(f"Failed to cancel walk: {response.model_dump_json()}")
-                        except Exception as e:
-                            st.error(f"An error occurred while cancelling the walk: {e}")
+                                st.error(f"An error occurred while updating the walk: {e}")
+  
         else:
             st.write("No scheduled walks found.")
 
@@ -113,45 +153,10 @@ with tab1:
 
 with tab2:
     try:
-
-        # Dog selection
-        selected_dog = st.selectbox("Select a Dog", options=dog_list, format_func=lambda x: x["name"])
-        
-        # Date input
-        selected_date = st.date_input("Select a Date")
-        selected_time = st.time_input("Select a Time")
-        scheduled_date = datetime.combine(selected_date, selected_time)
-        
-        # Submit button
-        if st.button("Schedule Walk"):
-            if selected_dog and scheduled_date:
-                try:
-                    # Schedule the walk
-                    response = execute_query(
-                        st_supabase_client.table("walk").insert(
-                            {
-                                "scheduled_at": str(scheduled_date),
-                                "dog_id": selected_dog["id"],
-                                "status": "Scheduled"
-                            }
-                        ),
-                        ttl="10min",
-                    )
-                    if response.data:
-                        st.success("Walk scheduled successfully!")
-                        st.rerun()
-                    else:
-                        st.error(f"Failed to schedule walk: {response.model_dump_json()}")
-                except Exception as e:
-                    st.error(f"An error occurred while scheduling the walk: {e}")
-    except Exception as e:
-        st.error(f"An error occurred while fetching available dogs: {e}")
-
-with tab3:
-    try:
         calendar_list = execute_query(
             st_supabase_client.table("walk")
-            .select("scheduled_at, dog(name)"),
+            .select("scheduled_at, dog(name)")
+            .eq("status", "Scheduled"),
             ttl="0min",
         )
         if calendar_list:
@@ -166,7 +171,6 @@ with tab3:
             {"date": walk["scheduled_at"], "title": f"{walk['dog_name']}"}
             for walk in calendar_list
         ]
-        print("Events for calendar:")
         print(calendar_events)
         # Display the calendar with events
         the_calendar = calendar(
@@ -175,7 +179,6 @@ with tab3:
             # custom_css=custom_css,
             #key='calendar', # Assign a widget key to prevent state loss
             )
-        st.write(the_calendar)
     except Exception as e:
         st.error(f"An error occurred while fetching existing walks: {e}")
         calendar_list = []
