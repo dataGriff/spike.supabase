@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, UploadFile, File
+from fastapi import APIRouter, Request, Depends, UploadFile, File, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from ..database import supabase, SUPABASE_BUCKET, SUPABASE_URL
 from ..models import EmployeeCreate
@@ -19,8 +19,13 @@ async def read_employees(request: Request):
 async def add_employee(request: Request):
     """Render the employee creation form."""
     return templates.TemplateResponse("add_employee.html", {"request": request})
+
 @router.post("/add")
-async def create_employee(employee: EmployeeCreate = Depends(as_form), image: UploadFile = File(None)):
+async def create_employee(
+    employee: EmployeeCreate = Depends(EmployeeCreate.as_form),
+    image: UploadFile = File(None),
+    cls: str = Query(None)  # Make `cls` optional in the query parameters
+):
     image_url = None
     # Handle the uploaded image
     if image and image.filename != "":
@@ -34,8 +39,7 @@ async def create_employee(employee: EmployeeCreate = Depends(as_form), image: Up
         "first_name": employee.first_name,
         "last_name": employee.last_name,
         "email": employee.email,
-        "phone": employee.phone,
-        "address": employee.address,
+        "salary": employee.salary,
         "image_url": image_url
     }).execute()
 

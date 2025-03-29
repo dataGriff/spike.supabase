@@ -8,8 +8,6 @@
             <th>Last Name</th>
             <th>Email</th>
             <th>Salary</th>
-            <th>Phone</th>
-            <th>Address</th>
             <th>Profile Image</th>
             <th>Active</th>
             <th>Actions</th>
@@ -22,8 +20,6 @@
             <td>{{ employee.last_name }}</td>
             <td>{{ employee.email }}</td>
             <td>{{ employee.salary }}</td>
-            <td>{{ employee.phone }}</td>
-            <td>{{ employee.address }}</td>
             <td>
                 {% if employee.image_url %}
                 <img src="{{ employee.image_url }}" alt="Profile Image" width="50">
