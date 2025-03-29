@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends, UploadFile, File, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from ..database import supabase, SUPABASE_BUCKET, SUPABASE_URL
-from ..models import EmployeeCreate
+from ..models import EmployeeCreate, EmployeeUpdate
 from ..forms import as_form
 from fastapi.templating import Jinja2Templates
 
@@ -45,3 +45,42 @@ async def create_employee(
 
     return RedirectResponse(url="/", status_code=303)
 
+@router.get("/edit/{employee_id}", response_class=HTMLResponse)
+async def edit_employee_form(request: Request, employee_id: int):
+    """Render the employee update form."""
+    response = supabase.table("employees").select("*").eq('id', employee_id).execute()
+    employee = response.data[0] if response.data else None
+    if not employee:
+        return templates.TemplateResponse("error.html", {"request": request, 'errors': ['Employee Not Found']}, status_code=404)
+    
+    return templates.TemplateResponse("edit_employee.html", {"request": request, "employee": employee})
+
+@router.post("/edit/{employee_id}")
+async def edit_employee(
+    request: Request,
+    employee_id: int,
+    employee: EmployeeUpdate = Depends(EmployeeUpdate.as_form),
+    image: UploadFile = File(None),
+):
+    image_url = None
+    # Handle the uploaded image
+    if image and image.filename != "":
+        image_file_name = f"{employee.first_name}_{employee.last_name}_{image.filename}"
+        file_content = await image.read()
+        # response = supabase.storage.from_(SUPABASE_BUCKET).upload(image_file_name, file_content)
+        # if response.status_code == 200:
+        image_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{image_file_name}"
+
+    update_data = employee.model_dump()
+
+    if image_url:
+        update_data["image_url"] = image_url
+    
+    supabase.table("employees").update(update_data).eq('id', employee_id).execute()
+    return RedirectResponse(url="/", status_code=303)
+
+@router.get("/deactivate/{employee_id}")
+async def deactivate_employee(employee_id: int):
+    """Deactivate an employee."""
+    supabase.table("employees").update({"is_active": False}).eq('id', employee_id).execute()
+    return RedirectResponse(url="/", status_code=303)

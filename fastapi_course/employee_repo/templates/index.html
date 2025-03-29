@@ -30,7 +30,7 @@
             <td>{{ "Yes" if employee.is_active else "No" }}</td>
             <td>
                 <a href="/edit/{{ employee.id }}">Edit</a>
-                <a href="/delete/{{ employee.id }}">Delete</a>
+                <a href="/deactivate/{{ employee.id }}">Deactivate</a>
             </td>
         </tr>
         {% endfor %}
