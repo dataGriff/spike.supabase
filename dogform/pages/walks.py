@@ -42,7 +42,7 @@ walk_list = execute_query(
     st_supabase_client.table("walk")
     .select("id, scheduled_date,scheduled_time, dog(name), status, dog_id")
     .eq("status", "Scheduled")
-    .order("scheduled_date"),
+    .order("scheduled_date,scheduled_time"),
     ttl="0min",
 )
 
@@ -89,12 +89,12 @@ with tab1:
                 with col2:
                     new_date = st.date_input("Scheduled Date", key="new_walk_date")
                 with col3:
-                    new_time = st.slider(
+                    new_time = st.selectbox(
                         "Scheduled Time",
-                        min_value=datetime.strptime("08:00", "%H:%M").time(),
-                        max_value=datetime.strptime("16:00", "%H:%M").time(),
-                        step=timedelta(minutes=30),
-                        format="HH:mm",
+                        options=[
+                            (datetime.strptime("08:00", "%H:%M") + timedelta(minutes=30 * i)).strftime("%H:%M")
+                            for i in range(int((datetime.strptime("16:00", "%H:%M") - datetime.strptime("08:00", "%H:%M")).seconds / 1800) + 1)
+                        ],
                         key="new_walk_time"
                     )
                 with col4:
@@ -173,9 +173,12 @@ with tab1:
                                 key=date_key
                             )
                         with col2:
-                            st.time_input(
-                                "Change Time",
-                                value=walk['scheduled_time'],
+                            st.selectbox(
+                        "Scheduled Time",
+                                options=[
+                                    (datetime.strptime("08:00", "%H:%M") + timedelta(minutes=30 * i)).strftime("%H:%M")
+                                    for i in range(int((datetime.strptime("16:00", "%H:%M") - datetime.strptime("08:00", "%H:%M")).seconds / 1800) + 1)
+                                ],
                                 key=time_key
                             )
                         with col3:
