@@ -89,7 +89,14 @@ with tab1:
                 with col2:
                     new_date = st.date_input("Scheduled Date", key="new_walk_date")
                 with col3:
-                    new_time = st.time_input("Scheduled Time", key="new_walk_time")
+                    new_time = st.time_input(
+                        "Scheduled Time",
+                        min_value=datetime.strptime("08:00", "%H:%M").time(),
+                        max_value=datetime.strptime("16:00", "%H:%M").time(),
+                        step=timedelta(minutes=30),
+                        format="HH:mm",
+                        key="new_walk_time"
+                    )
                 with col4:
                     add_walk_button = st.form_submit_button("Add Walk")
                     if add_walk_button:
