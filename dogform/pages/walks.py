@@ -89,7 +89,7 @@ with tab1:
                 with col2:
                     new_date = st.date_input("Scheduled Date", key="new_walk_date")
                 with col3:
-                    new_time = st.time_input(
+                    new_time = st.slider(
                         "Scheduled Time",
                         min_value=datetime.strptime("08:00", "%H:%M").time(),
                         max_value=datetime.strptime("16:00", "%H:%M").time(),
