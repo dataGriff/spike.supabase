@@ -9,5 +9,6 @@ requires .env file and these values
 SUPABASE_URL=
 SUPABASE_KEY=
 SUPABASE_BUCKET=
+SUPABASE_JWT_SECRET=
 
 and the key has to be the mega supabase one that overrides all rls access

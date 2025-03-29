@@ -7,4 +7,5 @@ fastapi
 uvicorn
 jinja2
 python-multipart
-email-validator
+email-validato
+PyJWT  
