@@ -87,9 +87,9 @@ with tab1:
                         key="new_walk_dog"
                     )
                 with col2:
-                    new_date = st.date_input("Scheduled Date", key="new_walk_date", value=datetime.now().date())
+                    new_date = st.date_input("Scheduled Date", key="new_walk_date")
                 with col3:
-                    new_time = st.time_input("Scheduled Time", key="new_walk_time", value=datetime.now().time()).strftime("%H:%M:%S")
+                    new_time = st.time_input("Scheduled Time", key="new_walk_time")
                 with col4:
                     add_walk_button = st.form_submit_button("Add Walk")
                     if add_walk_button:
