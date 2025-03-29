@@ -3,3 +3,8 @@ st-supabase-connection
 supabase
 streamlit_calendar
 python-dotenv
+fastapi
+uvicorn
+jinja2
+python-multipart
+email-validator
