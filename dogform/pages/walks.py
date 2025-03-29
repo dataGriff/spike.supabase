@@ -113,10 +113,10 @@ with tab1:
             st.write("Scheduled Walks:")
             
             for walk in walk_list:
-                form_key = f"walk_form_{walk['dog_id']}_{walk['scheduled_date']}_{walk['scheduled_time']}"
-                status_key = f"status_{walk['dog_id']}_{walk['scheduled_date']}_{walk['scheduled_time']}"
-                date_key = f"date_{walk['dog_id']}_{walk['scheduled_date']}_{walk['scheduled_time']}"
-                time_key = f"time_{walk['dog_id']}_{walk['scheduled_date']}_{walk['scheduled_time']}"
+                form_key = f"walk_form_{walk['id']}"
+                status_key = f"status_{walk['id']}"
+                date_key = f"date_{walk['id']}"
+                time_key = f"time_{walk['id']}"
                 with st.form(key=form_key):
                     # scheduled_at = datetime.strptime(walk['scheduled_date'], "%Y-%m-%dT%H:%M:%S.%f")
                     # time_diff = scheduled_at - datetime.now()
@@ -180,13 +180,12 @@ with tab1:
                         if submit_button:
                             try:
                                 # Update the walk status and date
-                                new_status = st.session_state[status_key]
                                 new_date = st.session_state[date_key]
                                 new_time = st.session_state[time_key]
                         
                                 response = execute_query(
                                     st_supabase_client.table("walk")
-                                    .update({"status": new_status,  "scheduled_date": str(new_date),"scheduled_time": str(new_time),})
+                                    .update({"scheduled_date": str(new_date),"scheduled_time": str(new_time),})
                                     .eq("id", walk["id"])
                                 )
                                 if response.data:
