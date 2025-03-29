@@ -31,7 +31,7 @@ async def create_employee(
     if image and image.filename != "":
         image_file_name = f"{employee.first_name}_{employee.last_name}_{image.filename}"
         file_content = await image.read()
-        # response = supabase.storage.from_(SUPABASE_BUCKET).upload(image_file_name, file_content)
+        response = supabase.storage.from_(SUPABASE_BUCKET).upload(image_file_name, file_content)
         # if response.status_code == 200:
         image_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{image_file_name}"
 
@@ -67,7 +67,7 @@ async def edit_employee(
     if image and image.filename != "":
         image_file_name = f"{employee.first_name}_{employee.last_name}_{image.filename}"
         file_content = await image.read()
-        # response = supabase.storage.from_(SUPABASE_BUCKET).upload(image_file_name, file_content)
+        response = supabase.storage.from_(SUPABASE_BUCKET).upload(image_file_name, file_content)
         # if response.status_code == 200:
         image_url = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET}/{image_file_name}"
 
